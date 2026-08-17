@@ -1,0 +1,8 @@
+{
+  "name": "Lakshmi Fashion World",
+  "description": "An exquisite traditional ethnic fashion boutique specializing in royal pattu sarees, heritage temple weaves, and ethnic couture with sacred banyan tree heritage elegance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

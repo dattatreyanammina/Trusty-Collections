@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read of all assets
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+    
+    // Allow guest uploads for payment screenshots
+    match /payments/{orderDocId}/{fileName} {
+      allow write: if request.resource.size < 5 * 1024 * 1024 // 5MB limit
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Products and other areas need admin auth
+    match /products/{allPaths=**} {
+      allow write: if request.auth != null; // Ideally isAdmin() but auth != null is a start for registered admins
+    }
+  }
+}

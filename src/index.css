@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:wght@200;300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-cinzel: "Cinzel", serif;
+  --font-sans: "Montserrat", sans-serif;
+  
+  --color-maroon: #7A0C16;
+  --color-maroon-dark: #4E050D;
+  --color-maroon-light: #9B1B26;
+  --color-gold: #D4AF37;
+  --color-gold-deep: #B38F24;
+  --color-gold-light: #F4E7B3;
+  --color-cream: #FAF6EE;
+  --color-temple-red: #A31D24;
+  --color-peacock-teal: #0D4E56;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-[#FAF6EE] text-stone-900;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.font-cinzel {
+  font-family: var(--font-cinzel);
+}
+
+.ethnic-border {
+  border: 1px solid var(--color-gold);
+  position: relative;
+}
+
+.ethnic-border::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid var(--color-gold);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Traditional South Indian Temple Border Motif (Zari Korvai) */
+.temple-border-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #D4AF37 0px,
+    #D4AF37 6px,
+    transparent 6px,
+    transparent 12px
+  ), repeating-linear-gradient(
+    -45deg,
+    #D4AF37 0px,
+    #D4AF37 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  height: 6px;
+  width: 100%;
+}
+
+.temple-zari-band {
+  background: linear-gradient(90deg, #7A0C16 0%, #B38F24 25%, #F4E7B3 50%, #B38F24 75%, #7A0C16 100%);
+  height: 3px;
+}
+
+.traditional-motif-overlay {
+  background-image: radial-gradient(#D4AF37 0.75px, transparent 0.75px), radial-gradient(#7A0C16 0.75px, #FAF6EE 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+

@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A fashion product (saree or dress)",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "price": { "type": "number" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "category": { "type": "string", "enum": ["Saree", "Dress"] },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "price", "category", "images"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "pincode": { "type": "string" },
+        "productId": { "type": "string" },
+        "productTitle": { "type": "string" },
+        "productPrice": { "type": "number" },
+        "paymentScreenshot": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Paid", "Shipped", "Delivered"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderId", "customerName", "phone", "address", "productId", "status"]
+    },
+    "Config": {
+      "title": "Config",
+      "description": "Global app configuration like UPI QR",
+      "type": "object",
+      "properties": {
+        "upiQrUrl": { "type": "string" },
+        "upiId": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "products": {
+      "schema": "Product",
+      "description": "Collection of all fashion products"
+    },
+    "orders": {
+      "schema": "Order",
+      "description": "Collection of all customer orders"
+    },
+    "config": {
+      "schema": "Config",
+      "description": "Global configuration settings"
+    }
+  }
+}
