@@ -79,8 +79,7 @@ service cloud.firestore {
 
       // Admin can create products
       allow create: if isAdmin()
-                    && isValidProduct(incoming())
-                    && incoming().createdAt == request.time;
+                    && isValidProduct(incoming());
 
       // Admin can update only these fields
       allow update: if isAdmin()
