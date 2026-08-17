@@ -108,7 +108,7 @@ export function AdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-transparent border-b-2 border-stone-100 py-3 pl-8 pr-4 outline-none focus:border-gold transition-colors font-medium text-sm"
-                placeholder="dattatreya_nammina@srmap.edu.in"
+                placeholder="Enter owner email"
               />
             </div>
           </div>
@@ -143,10 +143,7 @@ export function AdminLogin() {
           </div>
         </form>
 
-        <p className="mt-4 text-center text-[10px] text-stone-500 uppercase tracking-widest font-bold">
-          Owner account: dattatreya_nammina@srmap.edu.in
-        </p>
-        <p className="mt-2 text-center text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+        <p className="mt-4 text-center text-[10px] text-stone-400 uppercase tracking-widest font-bold">
           Restricted Access Only
         </p>
       </div>

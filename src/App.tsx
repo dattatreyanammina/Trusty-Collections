@@ -100,7 +100,7 @@ export default function App() {
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail size={15} className="text-gold shrink-0" />
-                  <span>orders@lakshmifashion.world</span>
+                  <span>orders@trustycollections</span>
                 </li>
                 <li className="pt-2">
                   <Link to="/admin/login" className="text-[11px] uppercase tracking-widest text-gold/60 hover:text-gold">

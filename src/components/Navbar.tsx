@@ -19,18 +19,18 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3.5 group">
           <div className="w-12 h-12 border-2 border-gold rounded-full flex items-center justify-center bg-maroon text-gold font-serif font-bold text-2xl shadow-inner group-hover:scale-105 transition-transform relative overflow-hidden">
-            <span className="relative z-10">ల</span>
+            <span className="relative z-10">TC</span>
             <div className="absolute inset-0 bg-gradient-to-tr from-gold/30 to-transparent opacity-60 pointer-events-none" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-gold font-cinzel text-xl font-bold tracking-widest leading-none">
-                LAKSHMI
+                Trusty
               </span>
               <Sparkles size={13} className="text-gold-light opacity-80" />
             </div>
             <span className="text-gold-light/90 font-serif italic text-xs tracking-[0.2em] font-medium leading-none mt-1">
-              Fashion World • Traditional Pattu
+              Collections • Traditional Pattu
             </span>
           </div>
         </Link>

@@ -44,12 +44,6 @@ export function AdminProductForm() {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        
-        // Validation: Limit to 10MB per image
-        if (file.size > 10 * 1024 * 1024) {
-          alert(`File "${file.name}" is too large (max 10MB).`);
-          continue;
-        }
 
         console.log(`Starting upload for: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
         const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
@@ -232,7 +226,7 @@ export function AdminProductForm() {
             <div className="bg-stone-50 p-4 rounded-lg flex items-start gap-3">
               <ImageIcon className="text-gold shrink-0 mt-0.5" size={16} />
               <p className="text-[10px] text-stone-500 leading-relaxed font-medium">
-                Upload clear images showing front and back. The first image will be the primary thumbnail. Recommended ratio: 3:4.
+                Upload any product image size or dimension. The first image will be the primary thumbnail. Landscape, portrait, and large files are accepted.
               </p>
             </div>
           </div>

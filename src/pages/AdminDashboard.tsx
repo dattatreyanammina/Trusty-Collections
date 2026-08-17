@@ -61,7 +61,7 @@ export function AdminDashboard() {
       <aside className="w-64 bg-stone-900 text-white flex flex-col fixed h-full z-10">
         <div className="p-8 border-b border-white/10">
           <Link to="/" className="flex flex-col items-center">
-            <span className="text-gold font-serif text-xl font-bold tracking-tight italic">Lakshmi Portal</span>
+            <span className="text-gold font-serif text-xl font-bold tracking-tight italic">Trusty Collections Portal</span>
           </Link>
         </div>
         
