@@ -359,7 +359,7 @@ export function Home() {
                 Chat directly with our master silk consultant to see live video previews of exclusive pattu sarees.
               </p>
               <a 
-                href="https://wa.me/919491741484?text=Hi%20Lakshmi%20Fashion%20World%2C%20I%20would%20like%20a%20personal%20video%20call%20preview%20of%20Pattu%20Sarees." 
+                href="https://wa.me/7989840075?text=Hi%20Trusty%20Collections%2C%20I%20would%20like%20a%20personal%20video%20call%20preview%20of%20Pattu%20Sarees." 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-gold text-maroon-dark font-bold text-[11px] uppercase tracking-widest px-5 py-2.5 hover:bg-gold-light transition-colors"

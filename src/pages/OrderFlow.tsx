@@ -231,6 +231,14 @@ export function OrderFlow() {
                         Copy
                       </button>
                     </div>
+                    <a
+                      href="https://wa.me/7989840075?text=Hello%20Trusty%20Collections%2C%20I%20have%20a%20product%20question%20or%20order%20query%20regarding%20my%20purchase."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-emerald-500 transition-colors"
+                    >
+                      WhatsApp for Product / Order Help
+                    </a>
                   </div>
 
                   <div className="flex items-center justify-center gap-10 text-stone-300">

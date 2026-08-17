@@ -96,7 +96,7 @@ export default function App() {
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Phone size={15} className="text-gold shrink-0" />
-                  <a href="tel:7989840075" className="hover:text-gold transition-colors">+91 94917 41484</a>
+                  <a href="tel:+917989840075" className="hover:text-gold transition-colors">+91 79898 40075</a>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail size={15} className="text-gold shrink-0" />
