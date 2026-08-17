@@ -4,7 +4,7 @@ import { doc, getDoc, collection, addDoc, serverTimestamp, updateDoc } from 'fir
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, QrCode, ArrowRight, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import { CheckCircle2, QrCode, ArrowRight, ShieldCheck, CreditCard, Loader2, Minus, Plus } from 'lucide-react';
 import pattuLadyBanyanImg from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
 import brideBanyanPattuImg from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
 import heritageBanyanSilkImg from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
@@ -29,6 +29,7 @@ export function OrderFlow() {
   const [orderDataForEmail, setOrderDataForEmail] = useState<any>(null);
   const [generatedOrderId, setGeneratedOrderId] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
@@ -57,12 +58,15 @@ export function OrderFlow() {
     setLoading(true);
     try {
       const orderId = 'LFW-' + Math.floor(100000 + Math.random() * 900000);
+      const totalPrice = product.price * quantity;
       const orderData = {
         ...data,
         orderId,
         productId,
         productTitle: product.title,
         productPrice: product.price,
+        quantity,
+        totalPrice,
         status: 'Pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -71,6 +75,13 @@ export function OrderFlow() {
       setOrderDocId(docRef.id);
       setOrderDataForEmail(orderData);
       setGeneratedOrderId(orderId);
+      
+      // Send WhatsApp confirmation to buyer
+      const phoneNumber = data.phone.replace(/\D/g, '');
+      const confirmationMessage = `Hello ${data.customerName}! 🎉\n\nYour order has been created!\n\n📋 Order ID: ${orderId}\n📦 Product: ${product.title}\n🔢 Quantity: ${quantity}\n💰 Total Amount: ₹${totalPrice.toLocaleString('en-IN')}\n\nNext Step: Transfer ₹${totalPrice} to 7989840075 via UPI\n\nTrack your order: https://trusty-collections.vercel.app/track\n\nThank you for choosing Trusty Collections! 🙏\n- Trusty Collections`;
+      const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(confirmationMessage)}`;
+      window.open(whatsappLink, '_blank');
+      
       setStep('Payment');
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'orders');
@@ -151,10 +162,33 @@ export function OrderFlow() {
                   <div className="w-24 h-32 ethnic-border shrink-0">
                     <img src={product.images[0]} className="w-full h-full object-cover" alt="" />
                   </div>
-                  <div className="pt-2">
+                  <div className="pt-2 flex-grow">
                     <h2 className="text-3xl font-serif font-bold text-stone-900 italic mb-2">{product.title}</h2>
-                    <div className="inline-block bg-maroon text-gold px-3 py-1 text-xs font-bold font-serif mb-1 italic shadow-sm tracking-wide">Premium Product Selection</div>
-                    <p className="text-maroon font-serif text-xl font-bold mt-2">₹{product.price.toLocaleString('en-IN')}</p>
+                    <div className="inline-block bg-maroon text-gold px-3 py-1 text-xs font-bold font-serif mb-3 italic shadow-sm tracking-wide">Premium Product Selection</div>
+                    <p className="text-maroon font-serif text-xl font-bold mb-4">₹{product.price.toLocaleString('en-IN')}</p>
+                    
+                    {/* Quantity Selector */}
+                    <div className="flex items-center gap-4">
+                      <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Quantity:</label>
+                      <div className="flex items-center gap-2 border border-gold/30 rounded">
+                        <button 
+                          type="button"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          className="p-2 hover:bg-gold/10 transition-colors"
+                        >
+                          <Minus size={16} className="text-maroon" />
+                        </button>
+                        <span className="w-10 text-center font-bold text-lg text-maroon">{quantity}</span>
+                        <button 
+                          type="button"
+                          onClick={() => setQuantity(quantity + 1)}
+                          className="p-2 hover:bg-gold/10 transition-colors"
+                        >
+                          <Plus size={16} className="text-maroon" />
+                        </button>
+                      </div>
+                      <span className="text-sm font-bold text-gold">Total: ₹{(product.price * quantity).toLocaleString('en-IN')}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -208,71 +242,97 @@ export function OrderFlow() {
                 transition={{ duration: 0.5 }}
                 className="text-center"
               >
-                <div className="bg-[#fcf8f0] border border-gold/10 p-10 mb-10 shadow-inner">
-                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-gold mb-4 underline underline-offset-8">Secure Transaction Portal</h2>
-                  <h3 className="text-3xl font-serif font-bold text-stone-900 italic mb-4 leading-tight">Complete Your Purchase</h3>
-                  <p className="text-stone-500 text-sm mb-10 font-serif">Please settle the outstanding amount of <span className="font-bold text-maroon text-lg italic">₹{product.price.toLocaleString('en-IN')}</span> using our verified UPI channel.</p>
-                  
-                  <div className="p-4 inline-block ethnic-border mb-10 bg-white shadow-xl transform hover:scale-105 transition-transform duration-500 cursor-zoom-in">
-                    <div className="w-64 h-64 bg-stone-50 flex items-center justify-center relative overflow-hidden">
-                      <QrCode size={200} className="text-stone-800" strokeWidth={1} />
-                      <div className="absolute inset-0 border-4 border-white/80 pointer-events-none" />
+                {/* Order Summary */}
+                <div className="bg-gradient-to-r from-maroon-dark to-maroon text-gold p-8 mb-12 shadow-lg">
+                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold mb-4">Order Summary</h2>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center max-w-md mx-auto">
+                      <span className="font-serif italic">Product:</span>
+                      <span className="font-bold">{product.title.substring(0, 30)}...</span>
                     </div>
-                  </div>
-                  
-                  <div className="flex flex-col items-center gap-4 mb-10">
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Direct Payment Number</p>
-                    <div className="flex items-center gap-4 px-6 py-3 bg-white border border-gold/10 shadow-sm text-sm font-serif italic text-stone-800 group transition-all">
-                      7989840075
-                      <button 
-                        onClick={() => navigator.clipboard.writeText('7989840075')} 
-                        className="text-gold hover:text-maroon font-bold text-[10px] uppercase tracking-widest border-l border-stone-100 pl-4 transition-colors"
-                      >
-                        Copy
-                      </button>
+                    <div className="flex justify-between items-center max-w-md mx-auto">
+                      <span className="font-serif italic">Quantity:</span>
+                      <span className="font-bold">{quantity} x ₹{product.price.toLocaleString('en-IN')}</span>
                     </div>
-                    <a
-                      href="https://wa.me/7989840075?text=Hello%20Trusty%20Collections%2C%20I%20have%20a%20product%20question%20or%20order%20query%20regarding%20my%20purchase."
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-emerald-500 transition-colors"
-                    >
-                      WhatsApp for Product / Order Help
-                    </a>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-10 text-stone-300">
-                    <CreditCard size={28} strokeWidth={1} />
-                    <ShieldCheck size={28} strokeWidth={1} />
-                    <div className="h-8 w-px bg-stone-200" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" className="h-6 grayscale opacity-40" alt="" />
+                    <div className="border-t border-gold/30 pt-3 flex justify-between items-center max-w-md mx-auto">
+                      <span className="font-serif italic text-lg font-bold">Total Amount:</span>
+                      <span className="text-2xl font-bold">₹{(product.price * quantity).toLocaleString('en-IN')}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-8 max-w-sm mx-auto">
-                  <form onSubmit={handleTransactionSubmit} className="space-y-4">
-                    <div className="space-y-2 text-left">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">UPI Transaction Reference (UTR)</label>
-                        {step === 'Upload' && <span className="text-[10px] text-green-600 font-bold flex items-center gap-1"><CheckCircle2 size={12} /> ID Recorded</span>}
-                      </div>
-                      <input name="transactionId" required placeholder="12-digit Numeric ID" className="w-full bg-white border-b border-gold/20 py-3 px-1 outline-none focus:border-maroon transition-colors text-lg font-serif italic placeholder-stone-200" />
+                {/* Payment Instructions */}
+                <div className="bg-[#fcf8f0] border-2 border-gold p-12 mb-12 shadow-lg rounded-lg">
+                  <h3 className="text-3xl font-serif font-bold text-stone-900 italic mb-2">Complete Your Payment</h3>
+                  <p className="text-stone-600 text-sm mb-8 font-serif">Transfer the exact amount using UPI to confirm your order</p>
+                  
+                  {/* Payment Number Card */}
+                  <div className="bg-white border-4 border-gold rounded-2xl p-12 mb-8 shadow-xl inline-block max-w-md w-full">
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400 mb-6">UPI Payment Number</p>
+                    <div className="bg-gradient-to-r from-gold-deep via-gold to-gold-light bg-clip-text text-transparent mb-8">
+                      <p className="text-8xl font-bold tracking-wider leading-tight">7989840075</p>
                     </div>
-                    <button 
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-stone-900 text-gold py-4 font-bold text-xs uppercase tracking-widest hover:bg-maroon transition-all shadow-md disabled:bg-stone-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 size={14} className="animate-spin" />
-                          <span>Processing...</span>
-                        </>
-                      ) : (
-                        <span>Submit Reference ID</span>
-                      )}
-                    </button>
-                  </form>
+                    <div className="flex gap-3 justify-center">
+                      <button 
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText('7989840075')} 
+                        className="flex-1 bg-maroon text-gold px-6 py-3 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-stone-900 transition-all"
+                      >
+                        📋 Copy Number
+                      </button>
+                      <a
+                        href="https://wa.me/7989840075?text=Hello%20Trusty%20Collections%2C%20I%20have%20a%20question%20about%20my%20order%20and%20payment."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-emerald-600 text-white px-6 py-3 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-all"
+                      >
+                        💬 WhatsApp
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Payment Steps */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+                    <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-gold">
+                      <div className="text-2xl font-bold text-gold mb-2">1</div>
+                      <p className="text-xs text-stone-600">Copy the payment number above</p>
+                    </div>
+                    <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-gold">
+                      <div className="text-2xl font-bold text-gold mb-2">2</div>
+                      <p className="text-xs text-stone-600">Open your UPI app (Google Pay, PhonePe, etc.)</p>
+                    </div>
+                    <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-gold">
+                      <div className="text-2xl font-bold text-gold mb-2">3</div>
+                      <p className="text-xs text-stone-600">Send exact amount. Save transaction ID</p>
+                    </div>
+                  </div>
+
+                  {/* UTR Form */}
+                  <div className="space-y-8 max-w-sm mx-auto">
+                    <form onSubmit={handleTransactionSubmit} className="space-y-4">
+                      <div className="space-y-2 text-left">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">UPI Transaction Reference (UTR)</label>
+                          {step === 'Upload' && <span className="text-[10px] text-green-600 font-bold flex items-center gap-1"><CheckCircle2 size={12} /> ID Recorded</span>}
+                        </div>
+                        <input name="transactionId" required placeholder="12-digit Numeric ID" className="w-full bg-white border-b border-gold/20 py-3 px-1 outline-none focus:border-maroon transition-colors text-lg font-serif italic placeholder-stone-200" />
+                      </div>
+                      <button 
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-stone-900 text-gold py-4 font-bold text-xs uppercase tracking-widest hover:bg-maroon transition-all shadow-md disabled:bg-stone-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            <span>Processing...</span>
+                          </>
+                        ) : (
+                          <span>Submit Reference ID</span>
+                        )}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </motion.div>
             )}

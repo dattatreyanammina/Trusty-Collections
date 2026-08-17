@@ -3,7 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, orderBy, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Package, ShoppingCart, Settings, LogOut, Plus, Search, Trash2, Edit3, ExternalLink, Filter, CheckCircle, Truck, Clock, IndianRupee } from 'lucide-react';
+import { Package, ShoppingCart, Settings, LogOut, Plus, Search, Trash2, Edit3, ExternalLink, Filter, CheckCircle, Truck, Clock, IndianRupee, BarChart3, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { AdminProductForm } from '../components/AdminProductForm';
 
@@ -38,8 +38,16 @@ export function AdminDashboard() {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
+      const order = orders.find(o => o.id === orderId);
       await updateDoc(doc(db, 'orders', orderId), { status, updatedAt: new Date() });
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+      
+      // Send WhatsApp confirmation to buyer
+      if (order && order.phone) {
+        const message = `Hi ${order.customerName}! 🎉\n\nYour order ${order.orderId} status: ${status}\n📦 Product: ${order.productTitle}\n💰 Amount: ₹${order.productPrice}\n\nFor updates: https://trusty-collections.vercel.app/track\n\n- Trusty Collections`;
+        const whatsappLink = `https://wa.me/${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappLink, '_blank');
+      }
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `orders/${orderId}`);
     }
@@ -73,6 +81,10 @@ export function AdminDashboard() {
           <Link to="/admin/products" className={`flex items-center gap-4 p-4 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors ${location.pathname === '/admin/products' ? 'bg-maroon text-white shadow-lg' : 'text-stone-400 hover:text-white'}`}>
             <Package size={18} />
             Products
+          </Link>
+          <Link to="/admin/analytics" className={`flex items-center gap-4 p-4 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors ${location.pathname === '/admin/analytics' ? 'bg-maroon text-white shadow-lg' : 'text-stone-400 hover:text-white'}`}>
+            <BarChart3 size={18} />
+            Analytics
           </Link>
           <Link to="/admin/settings" className={`flex items-center gap-4 p-4 rounded-lg text-sm font-bold uppercase tracking-widest transition-colors ${location.pathname === '/admin/settings' ? 'bg-maroon text-white shadow-lg' : 'text-stone-400 hover:text-white'}`}>
             <Settings size={18} />
@@ -218,7 +230,85 @@ export function AdminDashboard() {
           <Route path="/products/add" element={<AdminProductForm />} />
           <Route path="/products/edit/:id" element={<AdminProductForm />} />
 
-          {/* Settings / Config */}
+          {/* Analytics - Monthly Tracking */}
+          <Route path="/analytics" element={
+            <div>
+              <h1 className="text-4xl font-bold text-stone-800 italic mb-10">Sales Analytics</h1>
+              
+              {/* Monthly Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="bg-gradient-to-br from-maroon to-maroon-dark text-gold p-8 rounded-xl shadow-xl">
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-80 mb-2">Total Revenue (All Time)</p>
+                  <p className="text-4xl font-bold mb-4">₹{orders.filter(o => o.status === 'Paid' || o.status === 'Shipped' || o.status === 'Delivered').reduce((acc, curr) => acc + (curr.totalPrice || curr.productPrice || 0), 0).toLocaleString('en-IN')}</p>
+                  <p className="text-xs font-medium opacity-75">{orders.filter(o => o.status === 'Paid' || o.status === 'Shipped' || o.status === 'Delivered').length} orders completed</p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-amber-600 to-amber-700 text-white p-8 rounded-xl shadow-xl">
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-80 mb-2">Total Products Sold</p>
+                  <p className="text-4xl font-bold mb-4">{orders.filter(o => o.status === 'Paid' || o.status === 'Shipped' || o.status === 'Delivered').reduce((acc, curr) => acc + (curr.quantity || 1), 0)}</p>
+                  <p className="text-xs font-medium opacity-75">units across all orders</p>
+                </div>
+                
+                <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white p-8 rounded-xl shadow-xl">
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-80 mb-2">Pending Orders</p>
+                  <p className="text-4xl font-bold mb-4">{orders.filter(o => o.status === 'Pending').length}</p>
+                  <p className="text-xs font-medium opacity-75">awaiting confirmation</p>
+                </div>
+              </div>
+
+              {/* Monthly Breakdown Table */}
+              <div className="bg-white rounded-xl shadow-xl border border-stone-200 overflow-hidden">
+                <div className="p-6 border-b border-stone-200 bg-stone-50">
+                  <h3 className="text-lg font-bold text-stone-800">Monthly Sales Breakdown</h3>
+                </div>
+                
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-200 bg-stone-50">
+                      <th className="p-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Month</th>
+                      <th className="p-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Orders</th>
+                      <th className="p-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Products Sold</th>
+                      <th className="p-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Revenue</th>
+                      <th className="p-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Top Product</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const date = new Date();
+                      date.setMonth(date.getMonth() - i);
+                      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+                      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                      
+                      const monthOrders = orders.filter(o => {
+                        const orderDate = o.createdAt?.toDate?.() || new Date(o.createdAt);
+                        return orderDate >= monthStart && orderDate <= monthEnd && (o.status === 'Paid' || o.status === 'Shipped' || o.status === 'Delivered');
+                      });
+                      
+                      const revenue = monthOrders.reduce((acc, curr) => acc + (curr.totalPrice || curr.productPrice || 0), 0);
+                      const productCount = monthOrders.reduce((acc, curr) => acc + (curr.quantity || 1), 0);
+                      
+                      const productMap: Record<string, number> = {};
+                      monthOrders.forEach(o => {
+                        productMap[o.productTitle] = (productMap[o.productTitle] || 0) + (o.quantity || 1);
+                      });
+                      const topProduct = Object.entries(productMap).sort(([, a], [, b]) => b - a)[0]?.[0] || '-';
+
+                      return (
+                        <tr key={i} className="border-b border-stone-100 hover:bg-stone-50 transition-colors">
+                          <td className="p-6 font-bold text-stone-800">{monthStart.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</td>
+                          <td className="p-6 font-bold text-maroon text-lg">{monthOrders.length}</td>
+                          <td className="p-6 font-bold text-amber-600 text-lg">{productCount}</td>
+                          <td className="p-6 font-bold text-emerald-600 text-lg">₹{revenue.toLocaleString('en-IN')}</td>
+                          <td className="p-6 text-xs text-stone-600 max-w-xs truncate">{topProduct}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          } />
+
           <Route path="/settings" element={
             <div className="max-w-2xl">
               <h1 className="text-4xl font-bold text-stone-800 italic mb-10">Store Settings</h1>
