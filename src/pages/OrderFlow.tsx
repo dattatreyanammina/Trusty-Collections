@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, QrCode, Upload, ArrowRight, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import { CheckCircle2, QrCode, ArrowRight, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
 import pattuLadyBanyanImg from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
 import brideBanyanPattuImg from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
 import heritageBanyanSilkImg from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
 
-type Step = 'Details' | 'Payment' | 'Upload' | 'Success';
+type Step = 'Details' | 'Payment' | 'Success';
 
 const CURATED_SAMPLE_ITEMS: Record<string, any> = {
   'lfw-kanchi-01': { title: 'Royal Crimson & Gold Temple Zari Kanchipuram Pattu Saree', price: 18500, images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop'] },
@@ -30,7 +29,6 @@ export function OrderFlow() {
   const [orderDataForEmail, setOrderDataForEmail] = useState<any>(null);
   const [generatedOrderId, setGeneratedOrderId] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
@@ -81,83 +79,6 @@ export function OrderFlow() {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (uploading) return;
-    const file = e.target.files?.[0];
-    const target = e.target;
-    if (!file || !orderDocId) return;
-
-    // Size limit: 5MB for screenshots
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Screenshot is too large (max 5MB).");
-      return;
-    }
-
-    setUploading(true);
-    console.log(`[OrderFlow] Starting upload for order: ${orderDocId}, file: ${file.name}`);
-    
-    try {
-      const storageRef = ref(storage, `payments/${orderDocId}/${file.name}`);
-      console.log("[OrderFlow] Ref created, starting uploadBytes...");
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log("[OrderFlow] Upload complete, fetching download URL...");
-      const url = await getDownloadURL(snapshot.ref);
-      
-      console.log("[OrderFlow] URL fetched, updating Firestore doc...");
-      await updateDoc(doc(db, 'orders', orderDocId), {
-        paymentScreenshot: url,
-        updatedAt: serverTimestamp()
-      });
-      console.log("[OrderFlow] Firestore updated successfully.");
-
-      // Send confirmation email (non-blocking)
-      if (orderDataForEmail) {
-        console.log("[OrderFlow] Triggering confirmation email...");
-        fetch('/api/send-confirmation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: orderDataForEmail.customerEmail,
-            orderId: orderDataForEmail.orderId,
-            customerName: orderDataForEmail.customerName,
-            productTitle: orderDataForEmail.productTitle,
-            productPrice: orderDataForEmail.productPrice,
-            address: orderDataForEmail.address
-          }),
-        })
-        .then(res => res.json())
-        .then(data => console.log("[OrderFlow] Email API response:", data))
-        .catch(err => console.error("[OrderFlow] Email trigger failed:", err));
-      }
-      
-      setStep('Success');
-    } catch (error: any) {
-      console.error("[OrderFlow] Upload error chain:", error);
-      let errorMsg = error.message || 'Unknown error';
-      
-      if (error.code?.startsWith('storage/')) {
-        if (error.code === 'storage/unauthorized') errorMsg = "Storage permission denied.";
-        else if (error.code === 'storage/quota-exceeded') errorMsg = "Storage quota exceeded.";
-      } else if (error.code === 'permission-denied') {
-        errorMsg = "Database permission denied. Your session may have expired.";
-      }
-      
-      alert(`Verification failed: ${errorMsg}`);
-      
-      if (error.code === 'permission-denied' || error.name === 'FirebaseError') {
-        try {
-          handleFirestoreError(error, OperationType.UPDATE, `orders/${orderDocId}`);
-        } catch (e) {
-          // Failure in error handler
-        }
-      }
-    } finally {
-      console.log("[OrderFlow] Cleaning up upload state.");
-      setUploading(false);
-      if (target) target.value = '';
-    }
-  };
-
   const handleTransactionSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -171,7 +92,23 @@ export function OrderFlow() {
         transactionId: transId,
         updatedAt: serverTimestamp()
       });
-      setStep('Upload');
+
+      if (orderDataForEmail) {
+        fetch('/api/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: orderDataForEmail.customerEmail,
+            orderId: orderDataForEmail.orderId,
+            customerName: orderDataForEmail.customerName,
+            productTitle: orderDataForEmail.productTitle,
+            productPrice: orderDataForEmail.productPrice,
+            address: orderDataForEmail.address
+          }),
+        }).catch(err => console.error("[OrderFlow] Email trigger failed:", err));
+      }
+
+      setStep('Success');
     } catch (error: any) {
       console.error("UTR submission error:", error);
       alert(`Failed to record Reference ID: ${error.message || 'Unknown error'}`);
@@ -191,10 +128,10 @@ export function OrderFlow() {
       <div className="flex items-center justify-center mb-16 px-4">
         {['Details', 'Payment', 'Success'].map((s, i) => (
           <div key={s} className="flex items-center">
-            <div className={`w-12 h-12 rounded-none border flex items-center justify-center font-serif text-lg transition-all duration-500 shadow-sm ${step === s || (step === 'Upload' && s === 'Payment') || (step === 'Success' && i < 3) ? 'bg-maroon text-gold border-gold' : 'bg-white text-stone-300 border-stone-100 opacity-50'}`}>
+            <div className={`w-12 h-12 rounded-none border flex items-center justify-center font-serif text-lg transition-all duration-500 shadow-sm ${step === s || (step === 'Success' && i < 3) ? 'bg-maroon text-gold border-gold' : 'bg-white text-stone-300 border-stone-100 opacity-50'}`}>
               {step === 'Success' && i < 3 ? <CheckCircle2 size={24} /> : `0${i + 1}`}
             </div>
-            {i < 2 && <div className={`w-20 h-[1px] mx-1 ${step === 'Payment' || step === 'Upload' || step === 'Success' ? 'bg-gold' : 'bg-stone-100'}`} />}
+            {i < 2 && <div className={`w-20 h-[1px] mx-1 ${step === 'Payment' || step === 'Success' ? 'bg-gold' : 'bg-stone-100'}`} />}
           </div>
         ))}
       </div>
@@ -263,7 +200,7 @@ export function OrderFlow() {
               </motion.div>
             )}
 
-            {(step === 'Payment' || step === 'Upload') && (
+            {step === 'Payment' && (
               <motion.div 
                 key="payment"
                 initial={{ opacity: 0, y: 20 }}
@@ -315,7 +252,7 @@ export function OrderFlow() {
                     </div>
                     <button 
                       type="submit"
-                      disabled={loading || uploading}
+                      disabled={loading}
                       className="w-full bg-stone-900 text-gold py-4 font-bold text-xs uppercase tracking-widest hover:bg-maroon transition-all shadow-md disabled:bg-stone-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? (
@@ -324,33 +261,10 @@ export function OrderFlow() {
                           <span>Processing...</span>
                         </>
                       ) : (
-                        <span>{step === 'Upload' ? 'Update Reference ID' : 'Submit Reference ID'}</span>
+                        <span>Submit Reference ID</span>
                       )}
                     </button>
                   </form>
-
-                  <div className="relative py-6">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gold/10"></div></div>
-                    <div className="relative flex justify-center text-[10px] uppercase tracking-widest italic"><span className="bg-white px-6 text-stone-400 font-bold">Preferred Method</span></div>
-                  </div>
-
-                    <div className="space-y-4">
-                      <p className="text-[10px] uppercase tracking-widest font-bold text-stone-600 mb-2">Upload Transfer Confirmation</p>
-                      <label className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed transition-all bg-[#fcf8f0]/30 group ${uploading ? 'border-maroon/50 cursor-wait' : 'border-gold/20 cursor-pointer hover:bg-gold/5 hover:border-maroon/30'}`}>
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          {uploading ? (
-                            <Loader2 className="w-10 h-10 mb-2 text-maroon animate-spin" strokeWidth={1} />
-                          ) : (
-                            <Upload className="w-10 h-10 mb-2 text-gold group-hover:text-maroon transition-colors" strokeWidth={1} />
-                          )}
-                          <p className={`text-[10px] tracking-widest uppercase font-bold transition-colors ${uploading ? 'text-maroon animate-pulse' : 'text-stone-400 group-hover:text-stone-600'}`}>
-                            {uploading ? 'Verifying Documents...' : 'Attach Receipt Image'}
-                          </p>
-                          {uploading && <p className="text-[8px] text-stone-400 mt-2 italic">Please do not refresh the manifest</p>}
-                        </div>
-                        <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading || loading} />
-                      </label>
-                    </div>
                 </div>
               </motion.div>
             )}

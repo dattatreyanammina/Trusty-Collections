@@ -14,7 +14,7 @@ export function AdminLogin() {
   const location = useLocation();
 
   const handleAdminVerify = async (user: any) => {
-    // Check if the user's email is the developer email (bootstrapped)
+    // Owner access is authorized for the store developer account.
     if (user.email === 'dattatreya_nammina@srmap.edu.in') {
       const from = (location.state as any)?.from?.pathname || "/admin";
       navigate(from, { replace: true });
@@ -99,7 +99,7 @@ export function AdminLogin() {
           </div>
 
           <div className="space-y-1 relative">
-            <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Email Address</label>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Owner Email</label>
             <div className="relative">
               <Mail className="absolute left-0 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
               <input 
@@ -108,7 +108,7 @@ export function AdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-transparent border-b-2 border-stone-100 py-3 pl-8 pr-4 outline-none focus:border-gold transition-colors font-medium text-sm"
-                placeholder="admin@lakshmi.com"
+                placeholder="dattatreya_nammina@srmap.edu.in"
               />
             </div>
           </div>
@@ -143,7 +143,10 @@ export function AdminLogin() {
           </div>
         </form>
 
-        <p className="mt-8 text-center text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+        <p className="mt-4 text-center text-[10px] text-stone-500 uppercase tracking-widest font-bold">
+          Owner account: dattatreya_nammina@srmap.edu.in
+        </p>
+        <p className="mt-2 text-center text-[10px] text-stone-400 uppercase tracking-widest font-bold">
           Restricted Access Only
         </p>
       </div>
