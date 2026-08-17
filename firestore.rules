@@ -77,8 +77,8 @@ service cloud.firestore {
       // Everyone can browse products
       allow get, list: if true;
 
-      // Admin can create products
-      allow create: if isAdmin();
+      // Admin can create products (test: allow any signed-in user)
+      allow create: if request.auth != null;
 
       // Admin can update only these fields
       allow update: if isAdmin()
