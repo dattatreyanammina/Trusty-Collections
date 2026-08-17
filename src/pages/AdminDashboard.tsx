@@ -38,16 +38,8 @@ export function AdminDashboard() {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const order = orders.find(o => o.id === orderId);
       await updateDoc(doc(db, 'orders', orderId), { status, updatedAt: new Date() });
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
-      
-      // Send WhatsApp confirmation to buyer
-      if (order && order.phone) {
-        const message = `Hi ${order.customerName}! 🎉\n\nYour order ${order.orderId} status: ${status}\n📦 Product: ${order.productTitle}\n💰 Amount: ₹${order.productPrice}\n\nFor updates: https://trusty-collections.vercel.app/track\n\n- Trusty Collections`;
-        const whatsappLink = `https://wa.me/${order.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappLink, '_blank');
-      }
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `orders/${orderId}`);
     }
