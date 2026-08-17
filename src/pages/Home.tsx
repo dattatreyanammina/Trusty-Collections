@@ -127,6 +127,7 @@ export function Home() {
   }, []);
 
   const displayProducts = products.length > 0 ? products : CURATED_TRADITIONAL_COLLECTION;
+  const pattuSarees = displayProducts.filter(p => p.category?.toLowerCase().includes('saree') || p.category === 'Pattu Saree');
 
   const filteredProducts = filter === 'All' 
     ? displayProducts 
@@ -378,7 +379,42 @@ export function Home() {
       {/* 4. Auspicious Temple Band Divider */}
       <div className="temple-zari-band" />
 
-      {/* 5. Main Product Collections Showcase */}
+      {/* 5. Dedicated Pattu Saree Section */}
+      <section className="max-w-7xl mx-auto px-4 md:px-8 py-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-gold/30 pb-6">
+          <div>
+            <div className="flex items-center gap-2 text-gold-deep text-xs font-bold uppercase tracking-[0.25em] mb-2">
+              <Sparkles size={13} />
+              <span>Collection Spotlight</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl text-maroon font-serif font-bold italic">
+              Pattu Sarees
+            </h2>
+          </div>
+
+          <a
+            href="tel:+917989840075"
+            className="inline-flex items-center gap-2 bg-maroon text-gold px-5 py-3 text-[10px] uppercase tracking-[0.25em] font-bold hover:bg-gold hover:text-maroon transition-all"
+          >
+            Call for Details
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {pattuSarees.map((product, idx) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              delay={idx * 0.08}
+              showPrice={false}
+              ctaHref="tel:+917989840075"
+              ctaLabel="Call for Details"
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* 6. Main Product Collections Showcase */}
       <section id="collections" className="max-w-7xl mx-auto px-4 md:px-8 py-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 border-b border-gold/30 pb-6">
           <div>

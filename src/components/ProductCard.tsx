@@ -7,10 +7,20 @@ import { Product } from '../types';
 interface ProductCardProps {
   product: Product;
   delay?: number;
+  showPrice?: boolean;
+  ctaHref?: string;
+  ctaLabel?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, delay = 0 }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  delay = 0,
+  showPrice = true,
+  ctaHref,
+  ctaLabel = 'Order Saree Now'
+}) => {
   const displayImage = product.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop';
+  const actionHref = ctaHref || `/order/${product.id}`;
 
   return (
     <motion.div 
@@ -58,10 +68,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, delay = 0 }) 
             {product.title}
           </h3>
           <div className="flex justify-between items-center mt-3 border-t border-gold/20 pt-2.5">
-            <div className="flex flex-col text-left">
-              <span className="text-[9px] text-stone-400 font-sans uppercase tracking-wider">Price</span>
-              <span className="text-maroon font-serif text-xl font-bold leading-none">₹{product.price.toLocaleString('en-IN')}</span>
-            </div>
+            {showPrice ? (
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-stone-400 font-sans uppercase tracking-wider">Price</span>
+                <span className="text-maroon font-serif text-xl font-bold leading-none">₹{product.price.toLocaleString('en-IN')}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-stone-400 font-sans uppercase tracking-wider">Details</span>
+                <span className="text-maroon font-serif text-base font-bold leading-none">Call for details</span>
+              </div>
+            )}
             <div className="text-right">
               <span className="text-[9px] uppercase tracking-widest text-stone-400 font-mono">LFW-{product.id.slice(0, 4).toUpperCase()}</span>
               <span className="block text-[8px] text-emerald-700 font-semibold uppercase">In Stock</span>
@@ -71,13 +88,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, delay = 0 }) 
       </Link>
       
       <div className="mt-3">
-        <Link 
-          to={`/order/${product.id}`}
+        <a
+          href={actionHref}
           className="w-full bg-maroon-dark text-gold border border-gold/40 text-[10px] uppercase tracking-[0.2em] font-bold py-3 hover:bg-gold hover:text-maroon-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
         >
           <ShoppingBag size={13} strokeWidth={2.5} />
-          Order Saree Now
-        </Link>
+          {ctaLabel}
+        </a>
       </div>
     </motion.div>
   );
