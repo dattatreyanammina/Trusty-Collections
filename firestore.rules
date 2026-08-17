@@ -21,7 +21,7 @@ service cloud.firestore {
 
     // Admin access:
     // 1. Any UID with a document inside /admins/{uid}
-    // 2. lakshmi@admin.com
+    // 2. lakshmi@admin.com (direct UID)
     // 3. Developer SRM account (verified)
     function isAdmin() {
       return isSignedIn() && (
@@ -29,7 +29,7 @@ service cloud.firestore {
           /databases/$(database)/documents/admins/$(request.auth.uid)
         )
         ||
-        request.auth.token.email == 'lakshmi@admin.com'
+        request.auth.uid == 'xONzKpktBbcu9WUjqSO36XZmGD43'
         ||
         (
           request.auth.token.email == 'dattatreya_nammina@srmap.edu.in'
