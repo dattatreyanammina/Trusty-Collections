@@ -1,0 +1,15 @@
+{
+  "firestore": [
+    {
+      "target": "firestore",
+      "rules": "firestore.rules",
+      "database": "ai-studio-99de008b-bb00-4cca-9499-eecb528a44ee"
+    }
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "projects": {
+    "default": "gen-lang-client-0887583362"
+  }
+}
