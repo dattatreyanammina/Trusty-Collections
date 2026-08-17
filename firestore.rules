@@ -1,93 +1,240 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. Default deny catch-all
-    match /{document=**} {
-      allow read, write: if false;
+
+    // -----------------------------
+    // Common Helpers
+    // -----------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // Common Helpers
-    function isSignedIn() { return request.auth != null; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    function incoming() { return request.resource.data; }
-    function existing() { return resource.data; }
+    function incoming() {
+      return request.resource.data;
+    }
 
-    // Admin Check: You MUST explicitly look up roles using get() or exists() on a trusted database document.
-    // For this app, we'll use a simple 'admins' collection where the ID is the UID.
-    // We also bootstrap the developer email for initial setup.
-    function isAdmin() { 
+    function existing() {
+      return resource.data;
+    }
+
+    // Admin access:
+    // 1. Any UID with a document inside /admins/{uid}
+    // 2. lakshmi@admin.com
+    // 3. Developer SRM account (verified)
+    function isAdmin() {
       return isSignedIn() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        (request.auth.token.email == 'dattatreya_nammina@srmap.edu.in' && request.auth.token.email_verified == true)
+        exists(
+          /databases/$(database)/documents/admins/$(request.auth.uid)
+        )
+        ||
+        request.auth.token.email == 'lakshmi@admin.com'
+        ||
+        (
+          request.auth.token.email == 'dattatreya_nammina@srmap.edu.in'
+          && request.auth.token.email_verified == true
+        )
       );
     }
 
-    // --- Products ---
+
+    // =========================================================
+    // PRODUCTS
+    // =========================================================
+
     function isValidProduct(data) {
-      return data.title is string && data.title.size() <= 200
-          && data.price is number && data.price >= 0
-          && data.category is string && data.category in ['Pattu Saree', 'Blouse', 'Saree', 'Dress']
-          && (data.description == null || (data.description is string && data.description.size() <= 2000))
-          && data.images is list && data.images.size() > 0 && data.images.size() <= 10;
+      return data.title is string
+          && data.title.size() <= 200
+
+          && data.price is number
+          && data.price >= 0
+
+          && data.category is string
+          && data.category in [
+            'Pattu Saree',
+            'Blouse',
+            'Saree',
+            'Dress'
+          ]
+
+          && (
+            data.description == null
+            ||
+            (
+              data.description is string
+              && data.description.size() <= 2000
+            )
+          )
+
+          && data.images is list
+          && data.images.size() > 0
+          && data.images.size() <= 10;
     }
 
     match /products/{productId} {
-      // Users can browse products
+
+      // Everyone can browse products
       allow get, list: if true;
-      
-      // Only admins can modify products
-      allow create: if isAdmin() && isValidProduct(incoming()) && (incoming().createdAt == request.time || incoming().createdAt != null);
-      allow update: if isAdmin() && isValidProduct(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['title', 'price', 'category', 'description', 'images', 'updatedAt'])
-      );
+
+      // Admin can create products
+      allow create: if isAdmin()
+                    && isValidProduct(incoming())
+                    && incoming().createdAt == request.time;
+
+      // Admin can update only these fields
+      allow update: if isAdmin()
+                    && isValidProduct(incoming())
+                    && incoming()
+                        .diff(existing())
+                        .affectedKeys()
+                        .hasOnly([
+                          'title',
+                          'price',
+                          'category',
+                          'description',
+                          'images',
+                          'updatedAt'
+                        ]);
+
+      // Admin can delete products
       allow delete: if isAdmin();
     }
 
-    // --- Orders ---
+
+    // =========================================================
+    // ORDERS
+    // =========================================================
+
     function isValidOrder(data) {
-      return data.orderId is string && data.orderId.size() <= 20
-          && data.customerName is string && data.customerName.size() <= 100
-          && (data.customerEmail == null || (data.customerEmail is string && data.customerEmail.size() <= 100))
-          && data.phone is string && data.phone.size() <= 20
-          && data.address is string && data.address.size() <= 500
-          && data.productId is string && data.productId.size() <= 128
-          && data.status is string && data.status in ['Pending', 'Paid', 'Shipped', 'Delivered'];
+      return data.orderId is string
+          && data.orderId.size() <= 20
+
+          && data.customerName is string
+          && data.customerName.size() <= 100
+
+          && (
+            data.customerEmail == null
+            ||
+            (
+              data.customerEmail is string
+              && data.customerEmail.size() <= 100
+            )
+          )
+
+          && data.phone is string
+          && data.phone.size() <= 20
+
+          && data.address is string
+          && data.address.size() <= 500
+
+          && data.productId is string
+          && data.productId.size() <= 128
+
+          && data.status is string
+          && data.status in [
+            'Pending',
+            'Paid',
+            'Shipped',
+            'Delivered'
+          ];
     }
 
     match /orders/{orderDocId} {
-      // Allow GET for anyone who knows the ID (doc ID will be orderDocId)
-      // This is safe because users need the full document ID to read
-      allow get: if true; 
 
-      // Users can search/list their own orders by orderId or phone
-      // We enforce this by checking the query filters against the results
+      // Anyone with the exact order document ID can read it
+      allow get: if true;
+
+      // Admin can list orders.
+      // Existing query-based customer access retained.
       allow list: if (
-        isAdmin() || 
-        (request.query.limit <= 20 && (request.query.params.orderId != null || request.query.params.phone != null))
+        isAdmin()
+        ||
+        (
+          request.query.limit <= 20
+          &&
+          (
+            request.query.params.orderId != null
+            ||
+            request.query.params.phone != null
+          )
+        )
       );
 
-      // Users can create orders (Pending status only)
-      allow create: if isValidOrder(incoming()) && incoming().status == 'Pending' 
-                   && (incoming().createdAt == request.time || incoming().createdAt == null);
+      // Customer can create a Pending order
+      allow create: if isValidOrder(incoming())
+                    && incoming().status == 'Pending'
+                    && (
+                      incoming().createdAt == request.time
+                      ||
+                      incoming().createdAt == null
+                    );
 
-      // Users can only update their own order to add payment info (transactionId, paymentScreenshot)
-      // and only if current status is Pending
+      // Customer can add payment details while Pending.
+      // Admin can update the order.
       allow update: if (
-        (existing().status == 'Pending' && incoming().diff(existing()).affectedKeys().hasOnly(['transactionId', 'paymentScreenshot', 'updatedAt']))
-        || isAdmin() // Admins can update status (including status changes)
+        (
+          existing().status == 'Pending'
+          &&
+          incoming()
+            .diff(existing())
+            .affectedKeys()
+            .hasOnly([
+              'transactionId',
+              'paymentScreenshot',
+              'updatedAt'
+            ])
+        )
+        ||
+        isAdmin()
       );
+
+      // Only admin can delete orders
+      allow delete: if isAdmin();
     }
 
-    // --- Config ---
+
+    // =========================================================
+    // CONFIG
+    // =========================================================
+
     match /config/{configId} {
+
       allow read: if true;
-      allow write: if isAdmin();
+
+      allow create, update, delete: if isAdmin();
     }
 
-    // --- Admin Metadata ---
+
+    // =========================================================
+    // ADMIN METADATA
+    // =========================================================
+
     match /admins/{uid} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
-      allow write: if false; // Managed via console/backend
+
+      // Admin can read admin records.
+      // User can read their own admin record.
+      allow get: if isSignedIn()
+                 && (
+                   request.auth.uid == uid
+                   ||
+                   isAdmin()
+                 );
+
+      allow list: if isAdmin();
+
+      // Admin collection should be managed manually
+      // through Firebase Console/backend.
+      allow create, update, delete: if false;
+    }
+
+
+    // =========================================================
+    // DEFAULT DENY
+    // =========================================================
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
