@@ -227,10 +227,10 @@ export function AdminDashboard() {
                   <h3 className="text-xs uppercase tracking-widest font-bold text-stone-400">Payment Configuration</h3>
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-sm font-bold text-stone-700">Store UPI ID</label>
+                      <label className="text-sm font-bold text-stone-700">Store Payment Number</label>
                       <input 
                         type="text" 
-                        defaultValue="lakshmifashion@ybl" 
+                        defaultValue="7989840075" 
                         className="w-full bg-stone-50 border border-stone-200 rounded-lg p-4 font-medium outline-none focus:ring-2 focus:ring-maroon" 
                       />
                     </div>

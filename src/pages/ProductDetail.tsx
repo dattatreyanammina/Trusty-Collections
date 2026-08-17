@@ -5,6 +5,9 @@ import { db } from '../lib/firebase';
 import { motion } from 'motion/react';
 import { ShoppingBag, ChevronRight, Share2, Info, Truck, ShieldCheck, Heart, Sparkles, CheckCircle2, MessageCircle } from 'lucide-react';
 import { Product } from '../types';
+import brideImage from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
+import ladyImage from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
+import heritageImage from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
 
 // Curated lookup in case route is accessed for sample traditional item
 const CURATED_LOOKUP: Record<string, Product> = {
@@ -16,8 +19,8 @@ const CURATED_LOOKUP: Record<string, Product> = {
     category: 'Pattu Saree',
     images: [
       'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop',
-      '/src/assets/images/banyan_pattu_bride_1786950686742.jpg',
-      '/src/assets/images/pattu_saree_banyan_lady_1786950627044.jpg'
+      brideImage,
+      ladyImage
     ],
     inStock: true,
     createdAt: new Date().toISOString()
@@ -29,7 +32,7 @@ const CURATED_LOOKUP: Record<string, Product> = {
     price: 14200,
     category: 'Pattu Saree',
     images: [
-      '/src/assets/images/pattu_saree_banyan_lady_1786950627044.jpg',
+      ladyImage,
       'https://images.unsplash.com/photo-1583391733965-0da3c8d76378?q=80&w=1200&auto=format&fit=crop'
     ],
     inStock: true,
@@ -42,7 +45,7 @@ const CURATED_LOOKUP: Record<string, Product> = {
     price: 24800,
     category: 'Pattu Saree',
     images: [
-      '/src/assets/images/banyan_pattu_bride_1786950686742.jpg',
+      brideImage,
       'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop'
     ],
     inStock: true,
@@ -55,7 +58,7 @@ const CURATED_LOOKUP: Record<string, Product> = {
     price: 11900,
     category: 'Pattu Saree',
     images: [
-      '/src/assets/images/heritage_banyan_silk_1786950642861.jpg',
+      heritageImage,
       'https://images.unsplash.com/photo-1583391733965-0da3c8d76378?q=80&w=1200&auto=format&fit=crop'
     ],
     inStock: true,
@@ -69,7 +72,7 @@ const CURATED_LOOKUP: Record<string, Product> = {
     category: 'Pattu Saree',
     images: [
       'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop',
-      '/src/assets/images/pattu_saree_banyan_lady_1786950627044.jpg'
+      ladyImage
     ],
     inStock: true,
     createdAt: new Date().toISOString()
@@ -82,7 +85,7 @@ const CURATED_LOOKUP: Record<string, Product> = {
     category: 'Dress',
     images: [
       'https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=1200&auto=format&fit=crop',
-      '/src/assets/images/heritage_banyan_silk_1786950642861.jpg'
+      heritageImage
     ],
     inStock: true,
     createdAt: new Date().toISOString()

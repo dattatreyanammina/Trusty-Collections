@@ -6,14 +6,17 @@ import { db, storage, handleFirestoreError, OperationType } from '../lib/firebas
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, QrCode, Upload, ArrowRight, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import pattuLadyBanyanImg from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
+import brideBanyanPattuImg from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
+import heritageBanyanSilkImg from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
 
 type Step = 'Details' | 'Payment' | 'Upload' | 'Success';
 
 const CURATED_SAMPLE_ITEMS: Record<string, any> = {
   'lfw-kanchi-01': { title: 'Royal Crimson & Gold Temple Zari Kanchipuram Pattu Saree', price: 18500, images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop'] },
-  'lfw-dharm-02': { title: 'Peacock Teal & Mustard Dharmavaram Pure Silk Saree', price: 14200, images: ['/src/assets/images/pattu_saree_banyan_lady_1786950627044.jpg'] },
-  'lfw-bride-03': { title: 'Muhurtham Gold Brocade Pure Bridal Pattu Saree', price: 24800, images: ['/src/assets/images/banyan_pattu_bride_1786950686742.jpg'] },
-  'lfw-gadwal-04': { title: 'Emerald Green Heritage Gadwal Zari Border Saree', price: 11900, images: ['/src/assets/images/heritage_banyan_silk_1786950642861.jpg'] },
+  'lfw-dharm-02': { title: 'Peacock Teal & Mustard Dharmavaram Pure Silk Saree', price: 14200, images: [pattuLadyBanyanImg] },
+  'lfw-bride-03': { title: 'Muhurtham Gold Brocade Pure Bridal Pattu Saree', price: 24800, images: [brideBanyanPattuImg] },
+  'lfw-gadwal-04': { title: 'Emerald Green Heritage Gadwal Zari Border Saree', price: 11900, images: [heritageBanyanSilkImg] },
   'lfw-paith-05': { title: 'Royal Magenta Vintage Paithani Silk Saree', price: 16500, images: ['https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?q=80&w=1200&auto=format&fit=crop'] },
   'lfw-dress-06': { title: 'Handcrafted Heritage Pattu Silk Anarkali Dress Set', price: 12500, images: ['https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=1200&auto=format&fit=crop'] }
 };
@@ -281,11 +284,11 @@ export function OrderFlow() {
                   </div>
                   
                   <div className="flex flex-col items-center gap-4 mb-10">
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Direct UPI Identifier</p>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Direct Payment Number</p>
                     <div className="flex items-center gap-4 px-6 py-3 bg-white border border-gold/10 shadow-sm text-sm font-serif italic text-stone-800 group transition-all">
-                      lakshmifashion@ybl
+                      7989840075
                       <button 
-                        onClick={() => navigator.clipboard.writeText('lakshmifashion@ybl')} 
+                        onClick={() => navigator.clipboard.writeText('7989840075')} 
                         className="text-gold hover:text-maroon font-bold text-[10px] uppercase tracking-widest border-l border-stone-100 pl-4 transition-colors"
                       >
                         Copy

@@ -6,12 +6,16 @@ import { motion } from 'motion/react';
 import { Search, Sparkles, ShieldCheck, Award, HeartHandshake, PhoneCall, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Product } from '../types';
 import { Link } from 'react-router-dom';
+import heroBanyanLadiesImg from '../assets/images/hero_pattu_saree_banyan_1786950608588.jpg';
+import pattuLadyBanyanImg from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
+import banyanSilkHeritageImg from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
+import bridalBanyanPattuImg from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
 
 // Generated Traditional Assets
-const HERO_BANYAN_LADIES_IMG = '/src/assets/images/hero_pattu_saree_banyan_1786950608588.jpg';
-const PATTU_LADY_BANYAN_IMG = '/src/assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
-const BANYAN_SILK_HERITAGE_IMG = '/src/assets/images/heritage_banyan_silk_1786950642861.jpg';
-const BRIDAL_BANYAN_PATTU_IMG = '/src/assets/images/banyan_pattu_bride_1786950686742.jpg';
+const HERO_BANYAN_LADIES_IMG = heroBanyanLadiesImg;
+const PATTU_LADY_BANYAN_IMG = pattuLadyBanyanImg;
+const BANYAN_SILK_HERITAGE_IMG = banyanSilkHeritageImg;
+const BRIDAL_BANYAN_PATTU_IMG = bridalBanyanPattuImg;
 
 // Curated Traditional Fallback Sarees for Instant Visual Richness
 const CURATED_TRADITIONAL_COLLECTION: Product[] = [
