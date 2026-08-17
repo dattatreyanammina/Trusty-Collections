@@ -26,7 +26,7 @@ service cloud.firestore {
     function isValidProduct(data) {
       return data.title is string && data.title.size() <= 200
           && data.price is number && data.price >= 0
-          && data.category is string && data.category in ['Saree', 'Dress']
+          && data.category is string && data.category in ['Pattu Saree', 'Blouse', 'Saree', 'Dress']
           && (data.description == null || (data.description is string && data.description.size() <= 2000))
           && data.images is list && data.images.size() > 0 && data.images.size() <= 10;
     }
@@ -36,7 +36,7 @@ service cloud.firestore {
       allow get, list: if true;
       
       // Only admins can modify products
-      allow create: if isAdmin() && isValidProduct(incoming()) && incoming().createdAt == request.time;
+      allow create: if isAdmin() && isValidProduct(incoming()) && (incoming().createdAt == request.time || incoming().createdAt != null);
       allow update: if isAdmin() && isValidProduct(incoming()) && (
         incoming().diff(existing()).affectedKeys().hasOnly(['title', 'price', 'category', 'description', 'images', 'updatedAt'])
       );
