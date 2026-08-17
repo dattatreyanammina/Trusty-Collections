@@ -78,8 +78,7 @@ service cloud.firestore {
       allow get, list: if true;
 
       // Admin can create products
-      allow create: if isAdmin()
-                    && isValidProduct(incoming());
+      allow create: if isAdmin();
 
       // Admin can update only these fields
       allow update: if isAdmin()
