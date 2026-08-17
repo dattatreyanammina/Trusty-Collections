@@ -12,7 +12,7 @@ import { TrackOrder } from './pages/TrackOrder';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminProtectedRoute } from './components/AdminProtectedRoute';
-import { Sparkles, MapPin, Phone, Mail, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles, MapPin, Phone, Mail, ShieldCheck, Heart, Instagram, Youtube } from 'lucide-react';
 
 export default function App() {
   return (
@@ -87,7 +87,7 @@ export default function App() {
             {/* Col 3: Direct Weaver Contact */}
             <div>
               <h3 className="text-gold font-serif text-base font-bold uppercase tracking-widest mb-4 border-b border-gold/30 pb-2">
-                Weaver Concierge
+                Connect with Us
               </h3>
               <ul className="space-y-3 text-xs text-stone-400">
                 <li className="flex items-start gap-2.5">
@@ -101,6 +101,14 @@ export default function App() {
                 <li className="flex items-center gap-2.5">
                   <Mail size={15} className="text-gold shrink-0" />
                   <span>orders@trustycollections</span>
+                </li>
+                <li className="pt-4 flex items-center gap-3">
+                  <a href="https://www.instagram.com/7trusty_collections?igsh=MTZpOHY4dXZlc3Yzdw%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="p-2 bg-maroon rounded hover:bg-gold hover:text-maroon transition-colors">
+                    <Instagram size={16} />
+                  </a>
+                  <a href="https://youtube.com/@lakshmitheexplorer9632?si=c_lryfp0LQN7_T9j" target="_blank" rel="noopener noreferrer" className="p-2 bg-maroon rounded hover:bg-gold hover:text-maroon transition-colors">
+                    <Youtube size={16} />
+                  </a>
                 </li>
                 <li className="pt-2">
                   <Link to="/admin/login" className="text-[11px] uppercase tracking-widest text-gold/60 hover:text-gold">
