@@ -54,7 +54,7 @@ export default function App() {
                 </div>
                 <div>
                   <h2 className="text-gold font-cinzel text-xl font-bold tracking-widest leading-none">
-                    LAKSHMI FASHION WORLD
+                    Trusty Collections
                   </h2>
                   <p className="text-gold-light/80 text-[11px] font-serif italic tracking-[0.2em] mt-1">
                     Vata Vriksha Parampara • Pure Pattu Sarees
@@ -114,7 +114,7 @@ export default function App() {
 
           <div className="border-t border-gold/20 py-6 px-6 text-center text-xs text-stone-400 bg-black/30">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p>&copy; {new Date().getFullYear()} Lakshmi Fashion World. Handwoven with <Heart size={12} className="inline text-red-500 mx-1" /> for Indian Traditions.</p>
+              <p>&copy; {new Date().getFullYear()} Trusty Collections. Handwoven with <Heart size={12} className="inline text-red-500 mx-1" /> for Indian Traditions.</p>
               <div className="flex items-center gap-4 text-[11px] text-gold/70">
                 <span>100% Silk Mark</span>
                 <span>•</span>

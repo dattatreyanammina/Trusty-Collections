@@ -502,7 +502,7 @@ export function Home() {
           ల
         </div>
         <h3 className="text-3xl sm:text-4xl font-serif italic text-maroon font-bold mb-3">
-          Blessings of Lakshmi Fashion World
+          Blessings of Trusty Collections
         </h3>
         <p className="text-stone-600 text-sm max-w-2xl mx-auto leading-relaxed mb-8">
           Whether you are preparing for a South Indian wedding, Gruhapravesam, Upanayanam, or festive celebration, 
