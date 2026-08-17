@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, storage, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Save, Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save, X, Loader2, Image as ImageIcon } from 'lucide-react';
 
 export function AdminProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   
   const [imageUrlInput, setImageUrlInput] = useState('');
@@ -34,46 +32,6 @@ export function AdminProductForm() {
     }
     fetchProduct();
   }, [id, isEdit, reset]);
-
-  const onImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    setUploading(true);
-    
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        console.log(`Starting upload for: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-        const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-        
-        try {
-          const snapshot = await uploadBytes(storageRef, file);
-          const url = await getDownloadURL(snapshot.ref);
-          setImageUrls(prev => [...prev, url]);
-        } catch (uploadErr: any) {
-          console.error(`Error uploading ${file.name}:`, uploadErr);
-          let errorMsg = uploadErr.message || 'Check your internet connection';
-          if (uploadErr.code === 'storage/unauthorized') {
-            errorMsg = "Storage permissions denied. Please check if your account has admin access.";
-          } else if (uploadErr.code === 'storage/retry-limit-exceeded') {
-            errorMsg = "Upload timed out or was interrupted. Please try again with a smaller file.";
-          } else if (uploadErr.code === 'storage/canceled') {
-            errorMsg = "Upload was canceled. This can happen if the page is refreshed or connection is lost.";
-          }
-          alert(`Failed to upload ${file.name}: ${errorMsg}`);
-        }
-      }
-    } catch (err: any) {
-      console.error("General upload error:", err);
-      alert("An unexpected error occurred. Please try again.");
-    } finally {
-      setUploading(false);
-      // Reset input
-      if (e.target) e.target.value = '';
-    }
-  };
 
   const removeImage = (index: number) => {
     setImageUrls(prev => prev.filter((_, i) => i !== index));
@@ -169,19 +127,6 @@ export function AdminProductForm() {
                   {i === 0 && <span className="absolute bottom-0 left-0 w-full bg-gold text-[8px] font-bold uppercase text-white py-1 text-center">Primary</span>}
                 </div>
               ))}
-              {imageUrls.length < 10 && (
-                <label className="aspect-square rounded-lg border-2 border-dashed border-stone-200 flex flex-col items-center justify-center cursor-pointer hover:bg-stone-50 transition-colors group">
-                  <div className="relative">
-                    {uploading ? (
-                      <Loader2 className="animate-spin text-maroon" size={24} />
-                    ) : (
-                      <Upload className="text-stone-300 group-hover:text-gold transition-colors" size={24} />
-                    )}
-                  </div>
-                  <span className="text-[8px] uppercase tracking-widest font-bold text-stone-400 mt-2">Add Image</span>
-                  <input type="file" multiple className="hidden" onChange={onImageUpload} disabled={uploading} accept="image/*" />
-                </label>
-              )}
             </div>
 
             <div className="bg-stone-50 p-4 rounded-lg space-y-3">
@@ -204,7 +149,7 @@ export function AdminProductForm() {
                     if (!url) return;
                     
                     if (url.startsWith('data:')) {
-                      alert("Please do not paste base64 image data here. It will make the website slow. Use the 'Add Image' button above to upload the actual image file.");
+                      alert("Please do not paste base64 image data here. It will make the website slow. Use a direct image URL instead.");
                       return;
                     }
                     
@@ -226,7 +171,7 @@ export function AdminProductForm() {
             <div className="bg-stone-50 p-4 rounded-lg flex items-start gap-3">
               <ImageIcon className="text-gold shrink-0 mt-0.5" size={16} />
               <p className="text-[10px] text-stone-500 leading-relaxed font-medium">
-                Upload any product image size or dimension. The first image will be the primary thumbnail. Landscape, portrait, and large files are accepted.
+                Add product images using direct image URLs only. Firebase Storage upload is disabled due to account restrictions.
               </p>
             </div>
           </div>
@@ -242,7 +187,7 @@ export function AdminProductForm() {
           </button>
           <button 
             type="submit"
-            disabled={loading || uploading}
+            disabled={loading}
             className="bg-maroon text-gold-light px-16 py-5 rounded-lg font-bold uppercase tracking-[0.2em] shadow-2xl hover:bg-stone-900 transition-all flex items-center gap-3 disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />}
