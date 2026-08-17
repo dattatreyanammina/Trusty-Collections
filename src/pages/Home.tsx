@@ -129,7 +129,9 @@ export function Home() {
     ? displayProducts 
     : filter === 'Pattu Sarees' || filter === 'Saree'
       ? displayProducts.filter(p => p.category?.toLowerCase().includes('saree') || p.category === 'Pattu Saree')
-      : displayProducts.filter(p => p.category === filter);
+      : filter === 'Blouses'
+        ? displayProducts.filter(p => p.category === 'Blouse' || p.category?.toLowerCase().includes('blouse'))
+        : displayProducts.filter(p => p.category === filter);
 
   return (
     <div className="bg-[#FAF6EE] text-stone-900 overflow-hidden">
@@ -211,7 +213,7 @@ export function Home() {
             </a>
             
             <a 
-              href="https://wa.me/919491741484?text=Hello%20Lakshmi%20Fashion%20World%2C%20I%20would%20like%20to%20view%20your%20traditional%20Pattu%20Sarees%20and%20Bridal%20Collection."
+              href="https://wa.me/7989840075?text=Hello%20Lakshmi%20Fashion%20World%2C%20I%20would%20like%20to%20view%20your%20traditional%20Pattu%20Sarees%20and%20Bridal%20Collection."
               target="_blank" 
               rel="noopener noreferrer"
               className="w-full sm:w-auto bg-maroon-dark/90 backdrop-blur-md border border-gold/70 text-gold-light hover:bg-gold hover:text-maroon-dark px-8 py-4 font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
@@ -428,7 +430,7 @@ export function Home() {
           
           {/* Category Filter Chips */}
           <div className="flex flex-wrap items-center gap-2">
-            {['All', 'Pattu Sarees', 'Dress'].map((cat) => (
+            {['All', 'Pattu Sarees', 'Blouses', 'Dress'].map((cat) => (
               <button 
                 key={cat}
                 onClick={() => setFilter(cat)}
@@ -438,7 +440,7 @@ export function Home() {
                     : 'bg-white text-stone-600 border border-gold/30 hover:border-gold hover:text-maroon'
                 }`}
               >
-                {cat === 'All' ? 'All Traditional Weaves' : cat === 'Pattu Sarees' ? 'Pure Pattu Sarees' : 'Ethnic Dresses'}
+                {cat === 'All' ? 'All Traditional Weaves' : cat === 'Pattu Sarees' ? 'Pure Pattu Sarees' : cat === 'Blouses' ? 'Blouses' : 'Ethnic Dresses'}
               </button>
             ))}
           </div>
@@ -552,7 +554,7 @@ export function Home() {
             Track Existing Order
           </Link>
           <a 
-            href="https://wa.me/919491741484?text=Hi%20Lakshmi%20Fashion%20World%2C%20I%20have%20an%20inquiry%20regarding%20traditional%20Pattu%20Sarees."
+            href="https://wa.me/7989840075?text=Hi%20Lakshmi%20Fashion%20World%2C%20I%20have%20an%20inquiry%20regarding%20traditional%20Pattu%20Sarees."
             target="_blank"
             rel="noopener noreferrer"
             className="border border-maroon text-maroon px-8 py-3 text-xs uppercase tracking-[0.2em] font-bold hover:bg-maroon hover:text-gold transition-all"

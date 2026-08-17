@@ -37,9 +37,9 @@ export function Navbar() {
 
         <div className="hidden md:flex items-center gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-stone-200">
           <Link to="/" className="hover:text-gold transition-colors py-1 border-b-2 border-gold text-gold">Home</Link>
-          <Link to="/" className="hover:text-gold transition-colors py-1">Pattu Sarees</Link>
-          <Link to="/" className="hover:text-gold transition-colors py-1">Kanjeevaram</Link>
-          <Link to="/" className="hover:text-gold transition-colors py-1">Bridal Silk</Link>
+          <a href="/" className="hover:text-gold transition-colors py-1">Pattu Sarees</a>
+          <a href="/" className="hover:text-gold transition-colors py-1">Blouses</a>
+          <a href="tel:+917989840075" className="hover:text-gold transition-colors py-1">Call for Details</a>
           <Link to="/track" className="hover:text-gold transition-colors flex items-center gap-2 py-1">
             <Truck size={14} className="text-gold" />
             Track Order

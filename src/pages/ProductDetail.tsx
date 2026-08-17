@@ -286,7 +286,7 @@ export function ProductDetail() {
               </Link>
               
               <a 
-                href={`https://wa.me/919491741484?text=${encodeURIComponent(`Namaste Trusty Collections, I am interested in ordering: ${product.title} (Price: ₹${product.price}). Please share more details and video preview.`)}`}
+                href={`https://wa.me/7989840075?text=${encodeURIComponent(`Namaste Trusty Collections, I am interested in ordering: ${product.title} (Price: ₹${product.price}). Please share more details and video preview.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white border border-gold text-stone-800 h-14 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-stone-50 transition-all text-xs shadow-sm hover:border-maroon"

@@ -97,6 +97,8 @@ export function AdminProductForm() {
               <div className="space-y-1">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Category</label>
                 <select {...register('category', { required: true })} className="w-full border-b-2 border-stone-100 py-4 outline-none focus:border-gold transition-colors text-xs font-bold uppercase tracking-widest bg-transparent">
+                  <option value="Pattu Saree">Pattu Saree</option>
+                  <option value="Blouse">Blouse</option>
                   <option value="Saree">Saree</option>
                   <option value="Dress">Dress</option>
                 </select>
