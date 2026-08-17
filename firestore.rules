@@ -3,235 +3,121 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -----------------------------
-    // Common Helpers
-    // -----------------------------
+    // =====================================================
+    // HELPERS
+    // =====================================================
 
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    // Admin access:
-    // 1. Any UID with a document inside /admins/{uid}
-    // 2. lakshmi@admin.com
-    // 3. Developer SRM account (verified)
     function isAdmin() {
       return isSignedIn() && (
-        exists(
-          /databases/$(database)/documents/admins/$(request.auth.uid)
-        )
-        ||
         request.auth.token.email == 'lakshmi@admin.com'
         ||
-        (
-          request.auth.token.email == 'dattatreya_nammina@srmap.edu.in'
-          && request.auth.token.email_verified == true
+        request.auth.token.email == 'dattatreya_nammina@srmap.edu.in'
+        ||
+        exists(
+          /databases/$(database)/documents/admins/$(request.auth.uid)
         )
       );
     }
 
 
-    // =========================================================
+    // =====================================================
     // PRODUCTS
-    // =========================================================
-
-    function isValidProduct(data) {
-      return data.title is string
-          && data.title.size() <= 200
-
-          && data.price is number
-          && data.price >= 0
-
-          && data.category is string
-          && data.category in [
-            'Pattu Saree',
-            'Blouse',
-            'Saree',
-            'Dress'
-          ]
-
-          && (
-            data.description == null
-            ||
-            (
-              data.description is string
-              && data.description.size() <= 2000
-            )
-          )
-
-          && data.images is list
-          && data.images.size() > 0
-          && data.images.size() <= 10;
-    }
+    // =====================================================
 
     match /products/{productId} {
 
-      // Everyone can browse products
-      allow get, list: if true;
+      // Anyone can view products
+      allow read: if true;
 
-      // Admin can create products
-      allow create: if isAdmin()
-                    && isValidProduct(incoming())
-                    && incoming().createdAt == request.time;
+      // Only admins can create products
+      allow create: if isAdmin();
 
-      // Admin can update only these fields
-      allow update: if isAdmin()
-                    && isValidProduct(incoming())
-                    && incoming()
-                        .diff(existing())
-                        .affectedKeys()
-                        .hasOnly([
-                          'title',
-                          'price',
-                          'category',
-                          'description',
-                          'images',
-                          'updatedAt'
-                        ]);
+      // Only admins can edit products
+      allow update: if isAdmin();
 
-      // Admin can delete products
+      // Only admins can delete products
       allow delete: if isAdmin();
     }
 
 
-    // =========================================================
+    // =====================================================
     // ORDERS
-    // =========================================================
+    // =====================================================
 
-    function isValidOrder(data) {
-      return data.orderId is string
-          && data.orderId.size() <= 20
+    match /orders/{orderId} {
 
-          && data.customerName is string
-          && data.customerName.size() <= 100
-
-          && (
-            data.customerEmail == null
-            ||
-            (
-              data.customerEmail is string
-              && data.customerEmail.size() <= 100
-            )
-          )
-
-          && data.phone is string
-          && data.phone.size() <= 20
-
-          && data.address is string
-          && data.address.size() <= 500
-
-          && data.productId is string
-          && data.productId.size() <= 128
-
-          && data.status is string
-          && data.status in [
-            'Pending',
-            'Paid',
-            'Shipped',
-            'Delivered'
-          ];
-    }
-
-    match /orders/{orderDocId} {
-
-      // Anyone with the exact order document ID can read it
+      // Anyone who knows the order document ID can read it
       allow get: if true;
 
-      // Admin can list orders.
-      // Existing query-based customer access retained.
-      allow list: if (
+      // Admin can list all orders
+      allow list: if isAdmin();
+
+      // Customers can create orders
+      allow create: if
+        request.resource.data.status == 'Pending';
+
+      // Admin can update anything.
+      // Customer can only add payment information while Pending.
+      allow update: if
         isAdmin()
         ||
         (
-          request.query.limit <= 20
+          resource.data.status == 'Pending'
           &&
-          (
-            request.query.params.orderId != null
-            ||
-            request.query.params.phone != null
-          )
-        )
-      );
-
-      // Customer can create a Pending order
-      allow create: if isValidOrder(incoming())
-                    && incoming().status == 'Pending'
-                    && (
-                      incoming().createdAt == request.time
-                      ||
-                      incoming().createdAt == null
-                    );
-
-      // Customer can add payment details while Pending.
-      // Admin can update the order.
-      allow update: if (
-        (
-          existing().status == 'Pending'
-          &&
-          incoming()
-            .diff(existing())
+          request.resource.data
+            .diff(resource.data)
             .affectedKeys()
             .hasOnly([
               'transactionId',
               'paymentScreenshot',
               'updatedAt'
             ])
-        )
-        ||
-        isAdmin()
-      );
+        );
 
       // Only admin can delete orders
       allow delete: if isAdmin();
     }
 
 
-    // =========================================================
+    // =====================================================
     // CONFIG
-    // =========================================================
+    // =====================================================
 
     match /config/{configId} {
 
+      // Public config can be read
       allow read: if true;
 
+      // Only admins can change config
       allow create, update, delete: if isAdmin();
     }
 
 
-    // =========================================================
-    // ADMIN METADATA
-    // =========================================================
+    // =====================================================
+    // ADMIN RECORDS
+    // =====================================================
 
     match /admins/{uid} {
 
-      // Admin can read admin records.
-      // User can read their own admin record.
+      // User can check their own admin record
       allow get: if isSignedIn()
-                 && (
-                   request.auth.uid == uid
-                   ||
-                   isAdmin()
-                 );
+                 && request.auth.uid == uid;
 
+      // Admins can list admin records
       allow list: if isAdmin();
 
-      // Admin collection should be managed manually
-      // through Firebase Console/backend.
+      // Prevent frontend from creating admin accounts
       allow create, update, delete: if false;
     }
 
 
-    // =========================================================
+    // =====================================================
     // DEFAULT DENY
-    // =========================================================
+    // =====================================================
 
     match /{document=**} {
       allow read, write: if false;
