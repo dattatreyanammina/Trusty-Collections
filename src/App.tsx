@@ -138,7 +138,7 @@ export default function App() {
         <div className="sticky bottom-0 bg-gold text-maroon-dark font-serif font-bold text-[11px] tracking-[0.15em] uppercase py-2 px-4 shadow-2xl z-50 flex items-center justify-center gap-4 overflow-x-auto whitespace-nowrap border-t border-gold-light">
           <span>🌸 Free Insured Shipping Across India on All Pure Pattu Orders</span>
           <span className="text-maroon-dark/40">•</span>
-          <span>🪔 Direct WhatsApp Video Call Saree Selection Available</span>
+          <span>🪔 Personal Saree Selection Guidance Available</span>
           <span className="text-maroon-dark/40">•</span>
           <span>✨ 100% Pure Silk Mark & Tested Zari Certified</span>
         </div>

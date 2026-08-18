@@ -106,6 +106,18 @@ export function AdminProductForm() {
             </div>
 
             <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Availability</label>
+              <select
+                {...register('inStock', { setValueAs: (value) => value === 'true' || value === true })}
+                defaultValue={true}
+                className="w-full border-b-2 border-stone-100 py-4 outline-none focus:border-gold transition-colors text-xs font-bold uppercase tracking-widest bg-transparent"
+              >
+                <option value={true}>In Stock</option>
+                <option value={false}>Out of Stock</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Description</label>
               <textarea {...register('description')} rows={6} className="w-full bg-stone-50 rounded-lg p-4 outline-none focus:ring-1 focus:ring-maroon transition-colors text-sm font-medium resize-none" placeholder="Details about fabric, work, occasion..." />
             </div>

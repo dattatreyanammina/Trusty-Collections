@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import firebaseConfig from "./firebase-applet-config.json" with { type: "json" };
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +20,22 @@ try {
 }
 
 const db = getFirestore(firebaseConfig.firestoreDatabaseId);
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const ownerEmail = process.env.OWNER_EMAIL || process.env.EMAIL_FROM || "";
+const smtpUser = process.env.SMTP_USER || ownerEmail;
+const smtpPass = process.env.SMTP_PASS || "";
+const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+const smtpPort = Number(process.env.SMTP_PORT || "587");
+const transporter = ownerEmail && smtpUser && smtpPass
+  ? nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    })
+  : null;
 
 async function startServer() {
   const app = express();
@@ -46,50 +61,61 @@ async function startServer() {
   });
 
   app.post("/api/send-confirmation", async (req, res) => {
-    const { email, orderId, customerName, productTitle, productPrice, address } = req.body;
+    const {
+      email,
+      orderId,
+      customerName,
+      productTitle,
+      productPrice,
+      totalPrice,
+      quantity,
+      address,
+      pincode,
+      phone,
+    } = req.body;
 
-    if (!resend) {
-      console.warn("Resend API key not configured. Skipping email.");
+    if (!transporter || !ownerEmail) {
+      console.warn("SMTP owner email not configured. Skipping order email.");
       return res.status(200).json({ message: "Email service not configured", skipped: true });
     }
 
     try {
-      const { data, error } = await resend.emails.send({
-        from: "Lakshmi Fashion <onboarding@resend.dev>",
-        to: [email],
+      const mailResult = await transporter.sendMail({
+        from: `Trusty Collections <${ownerEmail}>`,
+        to: email,
+        replyTo: ownerEmail,
         subject: `Order Confirmation - ${orderId}`,
         html: `
-          <div style="font-family: serif; color: #1c1917; max-width: 600px; margin: 0 auto; border: 1px solid #d4af37; padding: 40px;">
-            <h1 style="color: #800000; text-align: center; font-style: italic;">Thank You for Your Patronage</h1>
-            <p style="text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: #d4af37;">Reservation Confirmed</p>
-            
-            <div style="background-color: #fcf8f0; padding: 20px; margin: 20px 0;">
+          <div style="font-family: serif; color: #1c1917; max-width: 620px; margin: 0 auto; border: 1px solid #d4af37; padding: 40px; background: #fffaf3;">
+            <h1 style="color: #800000; text-align: center; font-style: italic; margin-bottom: 8px;">Thank You for Your Patronage</h1>
+            <p style="text-align: center; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: #d4af37; margin: 0 0 24px;">Order Confirmed</p>
+
+            <div style="background-color: #f5efe5; padding: 20px; margin: 20px 0; border-left: 4px solid #d4af37;">
               <p><strong>Order ID:</strong> ${orderId}</p>
-              <p><strong>Status:</strong> Processing (Awaiting Verification)</p>
+              <p><strong>Status:</strong> Pending Payment Verification</p>
             </div>
 
             <h2 style="font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Details</h2>
             <p><strong>Customer:</strong> ${customerName}</p>
+            <p><strong>Contact:</strong> ${phone || "-"}</p>
             <p><strong>Product:</strong> ${productTitle}</p>
-            <p><strong>Amount:</strong> ₹${productPrice.toLocaleString('en-IN')}</p>
-            <p><strong>Shipping Address:</strong> ${address}</p>
+            <p><strong>Quantity:</strong> ${quantity || 1}</p>
+            <p><strong>Amount:</strong> ₹${Number(productPrice || totalPrice || 0).toLocaleString('en-IN')}</p>
+            <p><strong>Shipping Address:</strong> ${address}${pincode ? `, ${pincode}` : ""}</p>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-              <p style="font-style: italic;">You can track your heritage journey on our website using your Order ID.</p>
-              <a href="${process.env.APP_URL}/track?orderId=${orderId}" style="display: inline-block; background-color: #1c1917; color: #d4af37; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 10px; letter-spacing: 2px;">Track Manifest</a>
+              <p style="font-style: italic; margin-bottom: 18px;">You can track your heritage journey on our website using your order ID.</p>
+              <a href="${process.env.APP_URL || 'https://trusty-collections.vercel.app'}/track?orderId=${orderId}" style="display: inline-block; background-color: #1c1917; color: #d4af37; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 10px; letter-spacing: 2px;">Track Order</a>
             </div>
 
-            <p style="font-size: 10px; color: #a8a29e; margin-top: 40px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">Lakshmi Fashion - Curating Timeless Heritage</p>
+            <p style="font-size: 10px; color: #a8a29e; margin-top: 40px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">Trusty Collections - Curating Timeless Heritage</p>
           </div>
         `,
       });
 
-      if (error) {
-        return res.status(400).json(error);
-      }
-
-      res.status(200).json(data);
+      res.status(200).json({ messageId: mailResult.messageId });
     } catch (err) {
+      console.error("Order confirmation email failed:", err);
       res.status(500).json({ error: (err as Error).message });
     }
   });

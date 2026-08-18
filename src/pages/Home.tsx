@@ -213,13 +213,11 @@ export function Home() {
             </a>
             
             <a 
-              href="https://wa.me/7989840075?text=Hello%20Lakshmi%20Fashion%20World%2C%20I%20would%20like%20to%20view%20your%20traditional%20Pattu%20Sarees%20and%20Bridal%20Collection."
-              target="_blank" 
-              rel="noopener noreferrer"
+              href="mailto:orders@trustycollections.com?subject=Bridal%20Collection%20Inquiry"
               className="w-full sm:w-auto bg-maroon-dark/90 backdrop-blur-md border border-gold/70 text-gold-light hover:bg-gold hover:text-maroon-dark px-8 py-4 font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl"
             >
               <PhoneCall size={15} />
-              WhatsApp Bridal Inquiry
+              Email Bridal Inquiry
             </a>
           </motion.div>
 
@@ -359,12 +357,10 @@ export function Home() {
                 Chat directly with our master silk consultant to see live video previews of exclusive pattu sarees.
               </p>
               <a 
-                href="https://wa.me/7989840075?text=Hi%20Trusty%20Collections%2C%20I%20would%20like%20a%20personal%20video%20call%20preview%20of%20Pattu%20Sarees." 
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:orders@trustycollections.com?subject=Personal%20Pattu%20Selection%20Inquiry"
                 className="inline-flex items-center gap-2 bg-gold text-maroon-dark font-bold text-[11px] uppercase tracking-widest px-5 py-2.5 hover:bg-gold-light transition-colors"
               >
-                Request Video Preview <ArrowRight size={14} />
+                Request Personal Preview <ArrowRight size={14} />
               </a>
             </div>
 
@@ -554,9 +550,7 @@ export function Home() {
             Track Existing Order
           </Link>
           <a 
-            href="https://wa.me/7989840075?text=Hi%20Lakshmi%20Fashion%20World%2C%20I%20have%20an%20inquiry%20regarding%20traditional%20Pattu%20Sarees."
-            target="_blank"
-            rel="noopener noreferrer"
+            href="mailto:orders@trustycollections.com?subject=Traditional%20Pattu%20Sarees%20Inquiry"
             className="border border-maroon text-maroon px-8 py-3 text-xs uppercase tracking-[0.2em] font-bold hover:bg-maroon hover:text-gold transition-all"
           >
             Contact Weavers Team

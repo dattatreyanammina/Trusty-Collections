@@ -45,6 +45,15 @@ export function AdminDashboard() {
     }
   };
 
+  const updateProductStock = async (productId: string, inStock: boolean) => {
+    try {
+      await updateDoc(doc(db, 'products', productId), { inStock, updatedAt: new Date() });
+      setProducts(prev => prev.map(product => product.id === productId ? { ...product, inStock } : product));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `products/${productId}`);
+    }
+  };
+
   const deleteProduct = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
@@ -206,8 +215,26 @@ export function AdminDashboard() {
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="font-serif italic text-xl text-stone-800 mb-1">{product.title}</h3>
-                      <p className="text-stone-500 font-bold mb-4">₹{product.price.toLocaleString('en-IN')}</p>
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <h3 className="font-serif italic text-xl text-stone-800">{product.title}</h3>
+                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${product.inStock === false ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {product.inStock === false ? 'Out of Stock' : 'In Stock'}
+                        </span>
+                      </div>
+                      <p className="text-stone-500 font-bold mb-3">₹{product.price.toLocaleString('en-IN')}</p>
+
+                      <div className="mb-4">
+                        <label className="block text-[9px] uppercase tracking-widest font-bold text-stone-400 mb-1">Availability</label>
+                        <select
+                          value={product.inStock === false ? 'Out of Stock' : 'In Stock'}
+                          onChange={(e) => updateProductStock(product.id, e.target.value === 'In Stock')}
+                          className="w-full border border-stone-200 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest bg-stone-50 text-stone-700 outline-none focus:border-maroon"
+                        >
+                          <option value="In Stock">In Stock</option>
+                          <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                      </div>
+
                       <Link to={`/product/${product.id}`} className="text-xs font-bold uppercase tracking-widest text-stone-400 hover:text-maroon flex items-center gap-2">
                         <ExternalLink size={12} />
                         View Store Page

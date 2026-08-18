@@ -5,9 +5,10 @@ import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, QrCode, ArrowRight, ShieldCheck, CreditCard, Loader2, Minus, Plus } from 'lucide-react';
-import pattuLadyBanyanImg from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
-import brideBanyanPattuImg from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
-import heritageBanyanSilkImg from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
+
+const pattuLadyBanyanImg = '/images/pattu_saree_banyan_lady_1786950627044.jpg';
+const brideBanyanPattuImg = '/images/banyan_pattu_bride_1786950686742.jpg';
+const heritageBanyanSilkImg = '/images/heritage_banyan_silk_1786950642861.jpg';
 
 type Step = 'Details' | 'Payment' | 'Success';
 
@@ -76,12 +77,6 @@ export function OrderFlow() {
       setOrderDataForEmail(orderData);
       setGeneratedOrderId(orderId);
       
-      // Send WhatsApp confirmation to buyer
-      const phoneNumber = data.phone.replace(/\D/g, '');
-      const confirmationMessage = `Hello ${data.customerName}! 🎉\n\nYour order has been created!\n\n📋 Order ID: ${orderId}\n📦 Product: ${product.title}\n🔢 Quantity: ${quantity}\n💰 Total Amount: ₹${totalPrice.toLocaleString('en-IN')}\n\nNext Step: Transfer ₹${totalPrice} to 7989840075 via UPI\n\nTrack your order: https://trusty-collections.vercel.app/track\n\nThank you for choosing Trusty Collections! 🙏\n- Trusty Collections`;
-      const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(confirmationMessage)}`;
-      window.open(whatsappLink, '_blank');
-      
       setStep('Payment');
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'orders');
@@ -114,7 +109,11 @@ export function OrderFlow() {
             customerName: orderDataForEmail.customerName,
             productTitle: orderDataForEmail.productTitle,
             productPrice: orderDataForEmail.productPrice,
-            address: orderDataForEmail.address
+            totalPrice: orderDataForEmail.totalPrice,
+            quantity: orderDataForEmail.quantity,
+            address: orderDataForEmail.address,
+            pincode: orderDataForEmail.pincode,
+            phone: orderDataForEmail.phone
           }),
         }).catch(err => console.error("[OrderFlow] Email trigger failed:", err));
       }
@@ -272,22 +271,14 @@ export function OrderFlow() {
                     <div className="bg-gradient-to-r from-gold-deep via-gold to-gold-light bg-clip-text text-transparent mb-8">
                       <p className="text-8xl font-bold tracking-wider leading-tight">7989840075</p>
                     </div>
-                    <div className="flex gap-3 justify-center">
+                    <div className="flex justify-center">
                       <button 
                         type="button"
                         onClick={() => navigator.clipboard.writeText('7989840075')} 
-                        className="flex-1 bg-maroon text-gold px-6 py-3 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-stone-900 transition-all"
+                        className="w-full bg-maroon text-gold px-6 py-3 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-stone-900 transition-all"
                       >
                         📋 Copy Number
                       </button>
-                      <a
-                        href="https://wa.me/7989840075?text=Hello%20Trusty%20Collections%2C%20I%20have%20a%20question%20about%20my%20order%20and%20payment."
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 bg-emerald-600 text-white px-6 py-3 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-all"
-                      >
-                        💬 WhatsApp
-                      </a>
                     </div>
                   </div>
 

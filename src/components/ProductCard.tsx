@@ -81,20 +81,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
             <div className="text-right">
               <span className="text-[9px] uppercase tracking-widest text-stone-400 font-mono">LFW-{product.id.slice(0, 4).toUpperCase()}</span>
-              <span className="block text-[8px] text-emerald-700 font-semibold uppercase">In Stock</span>
+              <span className={`block text-[8px] font-semibold uppercase ${product.inStock === false ? 'text-red-700' : 'text-emerald-700'}`}>
+                {product.inStock === false ? 'Out of Stock' : 'In Stock'}
+              </span>
             </div>
           </div>
         </div>
       </Link>
       
       <div className="mt-3">
-        <a
-          href={actionHref}
-          className="w-full bg-maroon-dark text-gold border border-gold/40 text-[10px] uppercase tracking-[0.2em] font-bold py-3 hover:bg-gold hover:text-maroon-dark transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+        <Link
+          to={product.inStock === false ? '#' : actionHref}
+          onClick={product.inStock === false ? (event) => event.preventDefault() : undefined}
+          className={`w-full border text-[10px] uppercase tracking-[0.2em] font-bold py-3 flex items-center justify-center gap-2 shadow-md transition-all duration-300 ${product.inStock === false ? 'bg-stone-200 text-stone-500 border-stone-300 cursor-not-allowed' : 'bg-maroon-dark text-gold border-gold/40 hover:bg-gold hover:text-maroon-dark hover:shadow-lg'}`}
         >
           <ShoppingBag size={13} strokeWidth={2.5} />
-          {ctaLabel}
-        </a>
+          {product.inStock === false ? 'Sold Out' : ctaLabel}
+        </Link>
       </div>
     </motion.div>
   );

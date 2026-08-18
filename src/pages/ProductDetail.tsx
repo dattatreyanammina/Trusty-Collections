@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { motion } from 'motion/react';
-import { ShoppingBag, ChevronRight, Share2, Info, Truck, ShieldCheck, Heart, Sparkles, CheckCircle2, MessageCircle } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Share2, Info, Truck, ShieldCheck, Heart, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Product } from '../types';
-import brideImage from '../assets/images/banyan_pattu_bride_1786950686742.jpg';
-import ladyImage from '../assets/images/pattu_saree_banyan_lady_1786950627044.jpg';
-import heritageImage from '../assets/images/heritage_banyan_silk_1786950642861.jpg';
+
+const brideImage = '/images/banyan_pattu_bride_1786950686742.jpg';
+const ladyImage = '/images/pattu_saree_banyan_lady_1786950627044.jpg';
+const heritageImage = '/images/heritage_banyan_silk_1786950642861.jpg';
 
 // Curated lookup in case route is accessed for sample traditional item
 const CURATED_LOOKUP: Record<string, Product> = {
@@ -145,6 +146,7 @@ export function ProductDetail() {
   const imagesList = product.images && product.images.length > 0 
     ? product.images 
     : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1200&auto=format&fit=crop'];
+  const isInStock = product.inStock !== false;
 
   return (
     <div className="bg-[#FAF6EE] text-stone-900 min-h-screen">
@@ -233,14 +235,8 @@ export function ProductDetail() {
               <span className="text-4xl font-bold text-maroon font-serif leading-none">₹{product.price.toLocaleString('en-IN')}</span>
               <span className="text-[10px] text-emerald-800 font-semibold uppercase mt-1">Inclusive of all taxes & Free Express Delivery</span>
             </div>
-            <div className="bg-maroon text-gold text-[10px] font-bold px-3 py-2 uppercase tracking-wider border border-gold">
-              Save 20% Special
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-6">
-            <div className="bg-white p-6 border border-gold/30 shadow-sm relative ethnic-border">
+            <div className={`text-[10px] font-bold px-3 py-2 uppercase tracking-wider border ${isInStock ? 'bg-maroon text-gold border-gold' : 'bg-red-100 text-red-700 border-red-200'}`}>
+              {isInStock ? 'Save 20% Special' : 'Out of Stock'}
               <h3 className="text-xs uppercase tracking-widest font-bold text-maroon mb-3 flex items-center gap-2">
                 <Info size={15} className="text-gold" />
                 Weave & Fabric Specifications
@@ -277,23 +273,19 @@ export function ProductDetail() {
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-3.5 pt-2">
-              <Link 
-                to={`/order/${product.id}`}
-                className="bg-maroon-dark text-gold border-2 border-gold h-16 font-bold uppercase tracking-[0.25em] text-xs flex items-center justify-center gap-3 hover:bg-gold hover:text-maroon-dark transition-all duration-300 shadow-xl"
-              >
-                <ShoppingBag size={18} strokeWidth={2.5} />
-                <span>Place Order & Pay via UPI</span>
-              </Link>
-              
-              <a 
-                href={`https://wa.me/7989840075?text=${encodeURIComponent(`Namaste Trusty Collections, I am interested in ordering: ${product.title} (Price: ₹${product.price}). Please share more details and video preview.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white border border-gold text-stone-800 h-14 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-stone-50 transition-all text-xs shadow-sm hover:border-maroon"
-              >
-                <MessageCircle size={17} className="text-emerald-600" />
-                <span>Inquire on WhatsApp with Master Weaver</span>
-              </a>
+              {isInStock ? (
+                <Link
+                  to={`/order/${product.id}`}
+                  className="bg-maroon-dark text-gold border-2 border-gold h-16 font-bold uppercase tracking-[0.25em] text-xs flex items-center justify-center gap-3 hover:bg-gold hover:text-maroon-dark transition-all duration-300 shadow-xl"
+                >
+                  <ShoppingBag size={18} strokeWidth={2.5} />
+                  <span>Place Order & Pay via UPI</span>
+                </Link>
+              ) : (
+                <div className="bg-stone-200 text-stone-500 border border-stone-300 h-16 font-bold uppercase tracking-[0.25em] text-xs flex items-center justify-center">
+                  Sold Out
+                </div>
+              )}
             </div>
 
           </div>
